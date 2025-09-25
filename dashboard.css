@@ -19,19 +19,23 @@
     box-shadow: 0 4px 16px rgba(26,115,232,0.13);
     padding: 0.5rem 0;
     z-index: 3000;
-    min-width: 180px;
+    min-width: 220px;
 }
 .dropdown-link {
     display: block;
-    padding: 0.8rem 1.2rem;
+    padding: 0.8rem 1.8rem 0.8rem 1.8rem;
     color: #1a73e8;
     text-decoration: none;
     font-weight: 600;
-    border-bottom: 1px solid #e0e7ef;
+    border: none;
     transition: background 0.2s, color 0.2s;
 }
 .dropdown-link:last-child {
     border-bottom: none;
+    border-bottom: 1px solid #e0e7ef;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #e0e7ef;
 }
 .dropdown-link:hover {
     background: #e3f0fd;
@@ -41,50 +45,8 @@
     color: #e41a1c !important;
     font-weight: 700;
 }
-.side-menu {
-    position: fixed;
-    right: 0;
-    top: 0;
-    width: 220px;
-    height: 100vh;
-    background: linear-gradient(135deg, #1a73e8 60%, #4fc3f7 100%);
-    box-shadow: -2px 0 16px rgba(26,115,232,0.13);
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    padding-top: 2rem;
-    z-index: 1000;
-        transition: right 0.35s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.3s;
-}
-.side-menu.closed {
-    right: -260px;
-    opacity: 0.1;
-    pointer-events: none;
-}
-.side-menu ul li a {
-    position: relative;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-}
-.side-menu ul li a.active, .side-menu ul li a:focus, .side-menu ul li a:active {
-    background: #fff;
-    color: #1a73e8;
-    box-shadow: 2px 0 8px #1a73e81a;
-}
-.side-menu ul li a::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 6px;
-    border-radius: 6px 0 0 6px;
-    background: #1a73e8;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-.side-menu ul li a.active::before {
-    opacity: 1;
-}
+
+
 /* Animated Floating Card Styles */
 .container {
     max-width: 400px;
@@ -141,20 +103,7 @@
     margin-bottom: 1rem;
 }
 /* Advanced Side Menu Styles */
-.side-menu {
-    position: fixed;
-    right: 0;
-    top: 0;
-    width: 220px;
-    height: 100vh;
-    background: linear-gradient(135deg, #1a73e8 60%, #4fc3f7 100%);
-    box-shadow: -2px 0 16px rgba(26,115,232,0.13);
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    padding-top: 2rem;
-    z-index: 1000;
-}
+
 .side-menu .menu-title {
     color: #fff;
     font-size: 1.3rem;
@@ -181,11 +130,7 @@
     font-weight: 500;
     transition: background 0.2s, color 0.2s, box-shadow 0.2s;
 }
-.side-menu ul li a.active, .side-menu ul li a:hover {
-    background: #fff;
-    color: #1a73e8;
-    box-shadow: 2px 0 8px #1a73e81a;
-}
+
 .side-menu .logout {
     margin-top: auto;
     padding: 1.5rem 1rem 1rem 1rem;
