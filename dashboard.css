@@ -4,20 +4,29 @@
 .menu-icon {
     position: absolute;
     top: 24px;
-        right: 24px;
-    left: auto;
+    left: 24px;
     width: 44px;
     height: 44px;
     background: #fff;
     border-radius: 50%;
     box-shadow: 0 2px 8px rgba(26,115,232,0.13);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 2001;
     transition: box-shadow 0.2s, background 0.2s;
     border: 2px solid #e0e7ef;
+}
+@media (max-width: 700px) {
+    .menu-icon {
+        display: flex !important;
+        left: 12px;
+        top: 12px;
+        width: 38px;
+        height: 38px;
+    }
+}
 }
 .menu-icon.active, .menu-icon:hover {
     box-shadow: 0 8px 24px rgba(26,115,232,0.18);
