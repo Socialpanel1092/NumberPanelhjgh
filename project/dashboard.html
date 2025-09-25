@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NUMBERPANEL Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../dashboard.css">
+</head>
+<body>
+    <div class="side-menu">
+        <div class="menu-icon" id="menuIcon" tabindex="0" aria-label="Open menu" style="position:absolute;top:24px;left:24px;font-size:2.2rem;cursor:pointer;user-select:none;">
+            <span title="Menu" aria-label="Menu">📋</span>
+        </div>
+        <div class="menu-title">Menu</div>
+        <ul id="sideMenuList">
+            <li><a href="dashboard.html" class="active">Dashboard</a></li>
+            <li><a href="addfunds.html">Add Funds</a></li>
+            <li><a href="order.html">Order</a></li>
+            <li><a href="settings.html">Settings</a></li>
+            <li><a href="customer.html">Customer Care</a></li>
+            <li><a href="transaction.html">Transaction History</a></li>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+        <div class="logout">
+            <a href="logout.html">Log Out</a>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="container">
+            <h1>NUMBERPANEL</h1>
+            <div class="balance">Account Balance: ₦<span id="balance">0.00</span></div>
+            <div class="error" id="error-msg"></div>
+            <div id="countdown" style="position:absolute;top:20px;right:30px;font-size:1.2rem;color:#FFD600;font-weight:bold;display:none;"></div>
+            <form id="order-form">
+                <label for="country">Country</label>
+                <select id="country" required>
+                    <option value="">Select Country</option>
+                    <option value="UnitedStates">United States (USA)</option>
+                    <option value="UnitedKingdom">United Kingdom (UK)</option>
+                    <option value="Netherlands">Netherlands(NT)</option>
+                    <option value="France">France(FR)</option>
+                    <option value="Germany">Germany(GA)</option>
+                    <option value="Ireland">Ireland(IR)</option>
+                    <option value="Austrilia">Austrilia(AU)</option>
+                    <option value="Spain">Spain(SP)</option>
+                    <option value="Belgium">Belgium(BG)</option>
+                    <option value="Italy">Italy(IT)</option>
+                    <option value="Geogia">Geogia(GG)</option>
+                    <option value="Japan">Japan(JP)</option>
+                    <option value="Cameroon">Cameroon(CM)</option>
+                    <option value="Ghana">Ghana(GH)</option>
+                    <option value="China">China(CH)</option>
+                    <option value="Mexico">Mexico(MC)</option>
+                </select>
+                <label for="service">Service</label>
+                <select id="service" name="service" required>
+                    <option value="" disabled selected>Choose Service</option>
+                </select>
+                <label for="price">Price</label>
+                <input type="text" id="price" class="price" readonly>
+                <button type="submit" id="placeOrderBtn">Place Order</button>
+            </form>
+            <div id="purchaseResult" style="display:none;margin-top:2rem;text-align:center;background:#222;padding:1.5rem;border-radius:20px;color:#fff;">
+                                <div style="font-size:1.2rem;margin-bottom:0.7rem;">Your order is being processed.<br>You will receive your USA number and code soon via:</div>
+                                <div style="margin:1.2rem 0;">
+                                    <button id="whatsappBtn" style="background:#25D366;color:#fff;padding:0.7rem 2rem;border:none;border-radius:20px;font-size:1.1rem;cursor:pointer;margin:0 0.5rem;">WhatsApp</button>
+                                    <button id="emailBtn" style="background:#1a73e8;color:#fff;padding:0.7rem 2rem;border:none;border-radius:20px;font-size:1.1rem;cursor:pointer;margin:0 0.5rem;">Email</button>
+                                    <button id="flutterwaveBtn" style="background:#FFD600;color:#111;padding:0.7rem 2rem;border:none;border-radius:20px;font-size:1.1rem;cursor:pointer;margin:0 0.5rem;">Flutterwave Dashboard</button>
+                                </div>
+                                <div style="font-size:1rem;color:#FFD600;margin-top:1rem;">Please wait while we process your order.</div>
+            </div>
+        </div>
+    </div>
+    <script>
+    // Animated Hamburger menu logic
+    const sideMenu = document.querySelector('.side-menu');
+    const menuIcon = document.getElementById('menuIcon');
+    menuIcon.onclick = function(e) {
+        e.stopPropagation();
+        sideMenu.classList.toggle('closed');
+        menuIcon.classList.toggle('active');
+    };
+    menuIcon.onkeydown = function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            menuIcon.click();
+        }
+    };
+    document.addEventListener('click', function(e) {
+        if (!sideMenu.contains(e.target) && !menuIcon.contains(e.target)) {
+            sideMenu.classList.add('closed');
+            menuIcon.classList.remove('active');
+        }
+    });
+    function setMenuInitial() {
+        if (window.innerWidth < 800) {
+            sideMenu.classList.add('closed');
+            menuIcon.classList.remove('active');
+        } else {
+            sideMenu.classList.remove('closed');
+            menuIcon.classList.remove('active');
+        }
+    }
+    setMenuInitial();
+    window.addEventListener('resize', setMenuInitial);
+    // Highlight active menu item
+    const links = document.querySelectorAll('.side-menu ul li a');
+    links.forEach(link => {
+        if (window.location.pathname.endsWith(link.getAttribute('href'))) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+    // Show real balance from localStorage if available
+    let balance = localStorage.getItem('balance') ? parseFloat(localStorage.getItem('balance')) : 0;
+    document.getElementById('balance').textContent = balance.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+    // Country to service and price mapping
+        // Place Order button handler: save order to localStorage and redirect
+        document.getElementById('order-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const country = document.getElementById('country').value;
+            const service = document.getElementById('service').value;
+            const price = parseFloat(document.getElementById('price').value);
+            if (!country || !service || !price) return;
+            // Deduct price from balance
+            let balance = localStorage.getItem('balance') ? parseFloat(localStorage.getItem('balance')) : 0;
+            if (balance < price) {
+                document.getElementById('error-msg').textContent = 'Insufficient balance!';
+                return;
+            }
+            balance -= price;
+            localStorage.setItem('balance', balance);
+            document.getElementById('balance').textContent = balance.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+            document.getElementById('error-msg').textContent = '';
+            // Create order in backend
+            const userInfo = localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')) : {};
+            fetch('http://localhost:5000/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: userInfo.email || 'guest',
+                    service,
+                    country,
+                    price,
+                    paymentId: 'local-payment' // Replace with real payment ID if available
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.orderId) {
+                    document.getElementById('purchaseResult').style.display = 'block';
+                    // Start countdown
+                    let seconds = 200;
+                    document.getElementById('countdown').style.display = 'block';
+                    document.getElementById('countdown').textContent = 'Expires in: ' + seconds + 's';
+                    let timer = setInterval(function() {
+                        seconds--;
+                        document.getElementById('countdown').textContent = 'Expires in: ' + seconds + 's';
+                        if (seconds <= 0) {
+                            clearInterval(timer);
+                            document.getElementById('countdown').textContent = 'Expired';
+                            document.getElementById('purchaseResult').style.display = 'none';
+                        }
+                    }, 1000);
+                    // Poll backend for real number/code
+                    let pollCount = 0;
+                    function pollOrder() {
+                        fetch('http://localhost:5000/api/orders/' + data.orderId)
+                        .then(res => res.json())
+                        .then(order => {
+                            if (order.status === 'fulfilled' && order.number && order.code) {
+                                document.getElementById('purchaseResult').innerHTML =
+                                  '<div style="font-size:1.2rem;margin-bottom:0.7rem;">Your purchased USA number:</div>'+
+                                  '<div style="font-size:2rem;font-weight:bold;margin-bottom:1rem;">'+order.number+'</div>'+
+                                  '<div style="font-size:1.1rem;margin-bottom:1rem;">Code: <b>'+order.code+'</b></div>';
+                                clearInterval(timer);
+                                document.getElementById('countdown').textContent = 'Delivered';
+                            } else if (pollCount < 200) {
+                                pollCount++;
+                                setTimeout(pollOrder, 3000);
+                            }
+                        });
+                    }
+                    pollOrder();
+                    // WhatsApp, Email, Flutterwave buttons
+                    document.getElementById('whatsappBtn').onclick = function() {
+                        let msg = encodeURIComponent('Order placed! Please send the USA number and code to the customer. Order ID: ' + data.orderId);
+                        window.open('https://wa.me/?text=' + msg, '_blank');
+                    };
+                    document.getElementById('emailBtn').onclick = function() {
+                        let subject = encodeURIComponent('USA Number Order');
+                        let body = encodeURIComponent('Order placed! Please send the USA number and code to the customer. Order ID: ' + data.orderId);
+                        window.open('mailto:your@email.com?subject=' + subject + '&body=' + body, '_blank');
+                    };
+                    document.getElementById('flutterwaveBtn').onclick = function() {
+                        window.open('https://dashboard.flutterwave.com/', '_blank');
+                    };
+                }
+            });
+        });
+        const serviceMap = {
+            UnitedStates: [
+                { value: '2redbeans', label: '2red Beans', price: 2500 },
+                { value: '3Fun', label: '3Fun', price: 590 },
+                { value: 'aarp', label: 'AARP Rewards', price: 500 },
+                { value: 'acima', label: 'Acima', price: 2500 },
+                { value: 'acorns', label: 'Acorns', price: 650 },
+                { value: 'advance', label: 'Advance America', price: 890 },
+                { value: 'alibaba', label: 'Alibaba Cloud', price: 500 },
+                { value: 'amazon', label: 'Amazon', price: 2500 },
+                { value: 'apple', label: 'Apple', price: 750 },
+                { value: 'badoo', label: 'Badoo', price: 840 },
+                { value: 'bankofamerica', label: 'Bank Of America', price: 2800 },
+                { value: 'bet365', label: 'Bet365', price: 2800 },
+                { value: 'bumble', label: 'Bumble', price: 900 },
+                { value: 'cashapp', label: 'Cashapp', price: 15000 },
+                { value: 'chime', label: 'Chime', price: 900 },
+                { value: 'cocacola', label: 'COCA COLA', price: 400 },
+                { value: 'coinbase', label: 'Coinbase', price: 890 },
+                { value: 'crypto', label: 'Cripto.com', price: 590 },
+                { value: 'discord', label: 'Discord', price: 800 },
+                { value: 'ebay', label: 'ebay', price: 590 },
+                { value: 'etoro', label: 'eToro', price: 1200 },
+                { value: 'facebook', label: 'Facebook', price: 6000 },
+                { value: 'fidelity', label: 'Fidelity', price: 2800 },
+                { value: 'fiverr', label: 'Fiverr', price: 750 },
+                { value: 'footlocker', label: 'Footlocker', price: 970 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail/Youtube', price: 1200 },
+                { value: 'hinge', label: 'Hinge', price: 1200 },
+                { value: 'instagram', label: 'Instagram', price: 600 },
+                { value: 'linkedin', label: 'LinkedIn', price: 650 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 650 },
+                { value: 'okcupid', label: 'Okcupid', price: 650 },
+                { value: 'paypal', label: 'Paypal', price: 1500 },
+                { value: 'pof', label: 'POF', price: 500 },
+                { value: 'roblox', label: 'Roblox', price: 800 },
+                { value: 'signal', label: 'Signal', price: 600 },
+                { value: 'skout', label: 'Skout', price: 800 },
+                { value: 'snapchat', label: 'Snapchat', price: 2000 },
+                { value: 'sofi', label: 'Sofi-Bank', price: 2800 },
+                { value: 'steam', label: 'Steam', price: 2200 },
+                { value: 'telegram', label: 'Telegram', price: 3700 },
+                { value: 'temu', label: 'Temu', price: 500 },
+                { value: 'thread', label: 'Thread', price: 670 },
+                { value: 'tiktok', label: 'Tiktok', price: 700 },
+                { value: 'tinder', label: 'Tinder', price: 1200 },
+                { value: 'twitch', label: 'Twitch', price: 600 },
+                { value: 'x', label: 'X-Twitter', price: 500 },
+                { value: 'uber', label: 'Uber', price: 600 },
+                { value: 'upwork', label: 'Upwork', price: 600 },
+                { value: 'venmo', label: 'Venmo', price: 880 },
+                { value: 'viber', label: 'Viber', price: 999 },
+                { value: 'walmart', label: 'Walmart', price: 500 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 2500 },
+                { value: 'yahoo', label: 'Yahoo', price: 700 }
+            ],
+            Unitedkingdom: [
+                { value: '2redbeans', label: '2red Beans', price: 500 },
+                { value: '3Fun', label: '3Fun', price: 500 },
+                { value: 'aarp', label: 'AARP Rewards', price: 500 },
+                { value: 'acorns', label: 'Acorns', price: 500 },
+                { value: 'alibaba', label: 'Alibaba Cloud', price: 1000 },
+                { value: 'amazon', label: 'Amazon', price: 1300 },
+                { value: 'apple', label: 'Apple', price: 660 },
+                { value: 'badoo', label: 'Badoo', price: 680 },
+                { value: 'bet365', label: 'Bet365', price: 3100 },
+                { value: 'bumble', label: 'Bumble', price: 899 },
+                { value: 'cocacola', label: 'COCA COLA', price: 590 },
+                { value: 'discord', label: 'Discord', price: 690 },
+                { value: 'ebay', label: 'ebay', price: 5900 },
+                { value: 'etoro', label: 'eToro', price: 590 },
+                { value: 'facebook', label: 'Facebook', price: 2500 },
+                { value: 'fiverr', label: 'Fiverr', price: 690 },
+                { value: 'footlocker', label: 'Footlocker', price: 590 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail/', price: 1900 },
+                { value: 'hinge', label: 'Hinge', price: 600 },
+                { value: 'instagram', label: 'Instagram', price: 890 },
+                { value: 'linkedin', label: 'LinkedIn', price: 830 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 600 },
+                { value: 'pof', label: 'POF', price: 590 },
+                { value: 'roblox', label: 'Roblox', price: 800 },
+                { value: 'signal', label: 'Signal', price: 690 },
+                { value: 'snapchat', label: 'Snapchat', price: 699 },
+                { value: 'sofi', label: 'Sofi-Bank', price: 5900 },
+                { value: 'steam', label: 'Steam', price: 590 },
+                { value: 'telegram', label: 'Telegram', price: 600 },
+                { value: 'temu', label: 'Temu', price: 750 },
+                { value: 'thread', label: 'Thread', price: 1200 },
+                { value: 'tiktok', label: 'Tiktok', price: 590 },
+                { value: 'tinder', label: 'Tinder', price: 690 },
+                { value: 'twitch', label: 'Twitch', price: 690 },
+                { value: 'x', label: 'X-Twitter', price: 590 },
+                { value: 'upwork', label: 'Upwork', price: 690 },
+                { value: 'venmo', label: 'Venmo', price: 1200 },
+                { value: 'viber', label: 'Viber', price: 3500 },
+                { value: 'walmart', label: 'Walmart', price: 690 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 3500 },
+                { value: 'yahoo', label: 'Yahoo', price: 700 }
+            ],
+            Netherlands: [
+                { value: '2redbeans', label: '2red Beans', price: 1100 },
+                { value: '3Fun', label: '3Fun', price: 890 },
+                { value: 'aarp', label: 'AARP Rewards', price: 890 },
+                { value: 'acorns', label: 'Acorns', price: 999 },
+                { value: 'amazon', label: 'Amazon', price: 5100 },
+                { value: 'apple', label: 'Apple', price: 5200 },
+                { value: 'badoo', label: 'Badoo', price: 5300 },
+                { value: 'bet365', label: 'Bet365', price: 2800 },
+                { value: 'bumble', label: 'Bumble', price: 5200 },
+                { value: 'cocacola', label: 'COCA COLA', price: 810 },
+                { value: 'discord', label: 'Discord', price: 5200 },
+                { value: 'ebay', label: 'ebay', price: 5200 },
+                { value: 'etoro', label: 'eToro', price: 1200 },
+                { value: 'facebook', label: 'Facebook', price: 800 },
+                { value: 'fiverr', label: 'Fiverr', price: 1100 },
+                { value: 'footlocker', label: 'Footlocker', price: 890 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail/', price: 8900 },
+                { value: 'hinge', label: 'Hinge', price: 1000 },
+                { value: 'instagram', label: 'Instagram', price: 1200 },
+                { value: 'linkedin', label: 'LinkedIn', price: 2700 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 5600 },
+                { value: 'okcupid', label: 'Okcupid', price: 5400 },
+                { value: 'roblox', label: 'Roblox', price: 5600 },
+                { value: 'signal', label: 'Signal', price: 9500 },
+                { value: 'snapchat', label: 'Snapchat', price: 5500 },
+                { value: 'sofi', label: 'Sofi-Bank', price: 5600 },
+                { value: 'steam', label: 'Steam', price: 5600 },
+                { value: 'telegram', label: 'Telegram', price: 5700 },
+                { value: 'temu', label: 'Temu', price: 5700 },
+                { value: 'thread', label: 'Thread', price: 5100 },
+                { value: 'tiktok', label: 'Tiktok', price: 1200 },
+                { value: 'twitch', label: 'Twitch', price: 5600 },
+                { value: 'x', label: 'X-Twitter', price: 1100 },
+                { value: 'uber', label: 'Uber', price: 5600 },
+                { value: 'upwork', label: 'Upwork', price: 5600 },
+                { value: 'venmo', label: 'Venmo', price: 5500 },
+                { value: 'viber', label: 'Viber', price: 1100 },
+                { value: 'walmart', label: 'Walmart', price: 500 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 16000 },
+                { value: 'yahoo', label: 'Yahoo', price: 5900 }
+            ],
+            France: [
+                { value: '2redbeans', label: '2red Beans', price: 3300 },
+                { value: '3Fun', label: '3Fun', price: 3300 },
+                { value: 'aarp', label: 'AARP Rewards', price: 3300 },
+                { value: 'acorns', label: 'Acorns', price: 3300 },
+                { value: 'amazon', label: 'Amazon', price: 5900 },
+                { value: 'apple', label: 'Apple', price: 5800 },
+                { value: 'badoo', label: 'Badoo', price: 5900 },
+                { value: 'bet365', label: 'Bet365', price: 3400 },
+                { value: 'bumble', label: 'Bumble', price: 5900 },
+                { value: 'cocacola', label: 'COCA COLA', price: 3300 },
+                { value: 'discord', label: 'Discord', price: 5900 },
+                { value: 'ebay', label: 'ebay', price: 5900 },
+                { value: 'etoro', label: 'eToro', price: 5900 },
+                { value: 'facebook', label: 'Facebook', price: 3400 },
+                { value: 'fiverr', label: 'Fiverr', price: 3400 },
+                { value: 'footlocker', label: 'Footlocker', price: 3400 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail/', price: 8900 },
+                { value: 'hinge', label: 'Hinge', price: 3400 },
+                { value: 'instagram', label: 'Instagram', price: 5900 },
+                { value: 'linkedin', label: 'LinkedIn', price: 3400 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 5900 },
+                { value: 'roblox', label: 'Roblox', price: 3400 },
+                { value: 'signal', label: 'Signal', price: 3400 },
+                { value: 'skout', label: 'Skout', price: 5900 },
+                { value: 'snapchat', label: 'Snapchat', price: 5300 },
+                { value: 'steam', label: 'Steam', price: 5500 },
+                { value: 'telegram', label: 'Telegram', price: 13500 },
+                { value: 'tiktok', label: 'Tiktok', price: 5500 },
+                { value: 'tinder', label: 'Tinder', price: 8800 },
+                { value: 'twitch', label: 'Twitch', price: 5900 },
+                { value: 'x', label: 'X-Twitter', price: 5600 },
+                { value: 'uber', label: 'Uber', price: 5900 },
+                { value: 'upwork', label: 'Upwork', price: 3400 },
+                { value: 'viber', label: 'Viber', price: 5900 },
+                { value: 'walmart', label: 'Walmart', price: 3400 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 15500 },
+                { value: 'yahoo', label: 'Yahoo', price: 5900 }
+            ],
+            Germany: [
+                { value: '2redbeans', label: '2red Beans', price: 800 },
+                { value: '3Fun', label: '3Fun', price: 800 },
+                { value: 'aarp', label: 'AARP Rewards', price: 920 },
+                { value: 'acorns', label: 'Acorns', price: 800 },
+                { value: 'amazon', label: 'Amazon', price: 5900 },
+                { value: 'apple', label: 'Apple', price: 5900 },
+                { value: 'badoo', label: 'Badoo', price: 5800 },
+                { value: 'bumble', label: 'Bumble', price: 5900 },
+                { value: 'cocacola', label: 'COCA COLA', price: 590 },
+                { value: 'discord', label: 'Discord', price: 5900 },
+                { value: 'ebay', label: 'ebay', price: 6500 },
+                { value: 'etoro', label: 'eToro', price: 690 },
+                { value: 'facebook', label: 'Facebook', price: 500 },
+                { value: 'fiverr', label: 'Fiverr', price: 1200 },
+                { value: 'footlocker', label: 'Footlocker', price: 800 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail', price: 8900 },
+                { value: 'hinge', label: 'Hinge', price: 690 },
+                { value: 'instagram', label: 'Instagram', price: 5900 },
+                { value: 'linkedin', label: 'LinkedIn', price: 1000 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 5900 },
+                { value: 'roblox', label: 'Roblox', price: 2600 },
+                { value: 'signal', label: 'Signal', price: 2500 },
+                { value: 'skout', label: 'Skout', price: 5900 },
+                { value: 'snapchat', label: 'Snapchat', price: 5500 },
+                { value: 'steam', label: 'Steam', price: 5990 },
+                { value: 'telegram', label: 'Telegram', price: 15000 },
+                { value: 'thread', label: 'Thread', price: 5900 },
+                { value: 'tiktok', label: 'Tiktok', price: 5900 },
+                { value: 'tinder', label: 'Tinder', price: 5900 },
+                { value: 'twitch', label: 'Twitch', price: 5900 },
+                { value: 'x', label: 'X-Twitter', price: 5900 },
+                { value: 'uber', label: 'Uber', price: 1200 },
+                { value: 'venmo', label: 'Venmo', price: 5999 },
+                { value: 'viber', label: 'Viber', price: 1000 },
+                { value: 'walmart', label: 'Walmart', price: 1000 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 16000 },
+                { value: 'yahoo', label: 'Yahoo', price: 5800 }
+            ],
+            Ireland: [
+                { value: '2redbeans', label: '2red Beans', price: 500 },
+                { value: '3Fun', label: '3Fun', price: 500 },
+                { value: 'aarp', label: 'AARP Rewards', price: 500 },
+                { value: 'acorns', label: 'Acorns', price: 500 },
+                { value: 'alibaba', label: 'Alibaba Cloud', price: 1000 },
+                { value: 'amazon', label: 'Amazon', price: 1300 },
+                { value: 'apple', label: 'Apple', price: 660 },
+                { value: 'badoo', label: 'Badoo', price: 680 },
+                { value: 'bet365', label: 'Bet365', price: 3100 },
+                { value: 'bumble', label: 'Bumble', price: 899 },
+                { value: 'cocacola', label: 'COCA COLA', price: 590 },
+                { value: 'discord', label: 'Discord', price: 690 },
+                { value: 'ebay', label: 'ebay', price: 5900 },
+                { value: 'etoro', label: 'eToro', price: 590 },
+                { value: 'facebook', label: 'Facebook', price: 2500 },
+                { value: 'fiverr', label: 'Fiverr', price: 690 },
+                { value: 'footlocker', label: 'Footlocker', price: 590 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail/', price: 1900 },
+                { value: 'hinge', label: 'Hinge', price: 600 },
+                { value: 'instagram', label: 'Instagram', price: 890 },
+                { value: 'linkedin', label: 'LinkedIn', price: 830 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 600 },
+                { value: 'pof', label: 'POF', price: 590 },
+                { value: 'roblox', label: 'Roblox', price: 800 },
+                { value: 'signal', label: 'Signal', price: 690 },
+                { value: 'snapchat', label: 'Snapchat', price: 699 },
+                { value: 'sofi', label: 'Sofi-Bank', price: 5900 },
+                { value: 'steam', label: 'Steam', price: 590 },
+                { value: 'telegram', label: 'Telegram', price: 600 },
+                { value: 'temu', label: 'Temu', price: 750 },
+                { value: 'thread', label: 'Thread', price: 1200 },
+                { value: 'tiktok', label: 'Tiktok', price: 590 },
+                { value: 'tinder', label: 'Tinder', price: 690 },
+                { value: 'twitch', label: 'Twitch', price: 690 },
+                { value: 'x', label: 'X-Twitter', price: 590 },
+                { value: 'upwork', label: 'Upwork', price: 690 },
+                { value: 'venmo', label: 'Venmo', price: 1200 },
+                { value: 'viber', label: 'Viber', price: 3500 },
+                { value: 'walmart', label: 'Walmart', price: 690 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 3500 },
+                { value: 'yahoo', label: 'Yahoo', price: 700 }
+            ],
+            Austrilia: [
+                { value: '2redbeans', label: '2red Beans', price: 500 },
+                { value: '3Fun', label: '3Fun', price: 500 },
+                { value: 'aarp', label: 'AARP Rewards', price: 500 },
+                { value: 'acorns', label: 'Acorns', price: 500 },
+                { value: 'alibaba', label: 'Alibaba Cloud', price: 1000 },
+                { value: 'amazon', label: 'Amazon', price: 1300 },
+                { value: 'apple', label: 'Apple', price: 660 },
+                { value: 'badoo', label: 'Badoo', price: 680 },
+                { value: 'bet365', label: 'Bet365', price: 3100 },
+                { value: 'bumble', label: 'Bumble', price: 899 },
+                { value: 'cocacola', label: 'COCA COLA', price: 590 },
+                { value: 'discord', label: 'Discord', price: 690 },
+                { value: 'ebay', label: 'ebay', price: 5900 },
+                { value: 'etoro', label: 'eToro', price: 590 },
+                { value: 'facebook', label: 'Facebook', price: 2500 },
+                { value: 'fiverr', label: 'Fiverr', price: 690 },
+                { value: 'footlocker', label: 'Footlocker', price: 590 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail/', price: 1900 },
+                { value: 'hinge', label: 'Hinge', price: 600 },
+                { value: 'instagram', label: 'Instagram', price: 890 },
+                { value: 'linkedin', label: 'LinkedIn', price: 830 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 600 },
+                { value: 'pof', label: 'POF', price: 590 },
+                { value: 'roblox', label: 'Roblox', price: 800 },
+                { value: 'signal', label: 'Signal', price: 690 },
+                { value: 'snapchat', label: 'Snapchat', price: 699 },
+                { value: 'sofi', label: 'Sofi-Bank', price: 5900 },
+                { value: 'steam', label: 'Steam', price: 590 },
+                { value: 'telegram', label: 'Telegram', price: 600 },
+                { value: 'temu', label: 'Temu', price: 750 },
+                { value: 'thread', label: 'Thread', price: 1200 },
+                { value: 'tiktok', label: 'Tiktok', price: 590 },
+                { value: 'tinder', label: 'Tinder', price: 690 },
+                { value: 'twitch', label: 'Twitch', price: 690 },
+                { value: 'x', label: 'X-Twitter', price: 590 },
+                { value: 'upwork', label: 'Upwork', price: 690 },
+                { value: 'venmo', label: 'Venmo', price: 1200 },
+                { value: 'viber', label: 'Viber', price: 3500 },
+                { value: 'walmart', label: 'Walmart', price: 690 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 3500 },
+                { value: 'yahoo', label: 'Yahoo', price: 700 }
+            ],
+            Spain: [
+                { value: '2redbeans', label: '2red Beans', price: 1100 },
+                { value: '3Fun', label: '3Fun', price: 890 },
+                { value: 'aarp', label: 'AARP Rewards', price: 890 },
+                { value: 'acorns', label: 'Acorns', price: 999 },
+                { value: 'amazon', label: 'Amazon', price: 5100 },
+                { value: 'apple', label: 'Apple', price: 5200 },
+                { value: 'badoo', label: 'Badoo', price: 5300 },
+                { value: 'bet365', label: 'Bet365', price: 2800 },
+                { value: 'bumble', label: 'Bumble', price: 5200 },
+                { value: 'cocacola', label: 'COCA COLA', price: 810 },
+                { value: 'discord', label: 'Discord', price: 5200 },
+                { value: 'ebay', label: 'ebay', price: 5200 },
+                { value: 'etoro', label: 'eToro', price: 1200 },
+                { value: 'facebook', label: 'Facebook', price: 800 },
+                { value: 'fiverr', label: 'Fiverr', price: 1100 },
+                { value: 'footlocker', label: 'Footlocker', price: 890 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail/', price: 8900 },
+                { value: 'hinge', label: 'Hinge', price: 1000 },
+                { value: 'instagram', label: 'Instagram', price: 1200 },
+                { value: 'linkedin', label: 'LinkedIn', price: 2700 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 5600 },
+                { value: 'okcupid', label: 'Okcupid', price: 5400 },
+                { value: 'roblox', label: 'Roblox', price: 5600 },
+                { value: 'signal', label: 'Signal', price: 9500 },
+                { value: 'snapchat', label: 'Snapchat', price: 5500 },
+                { value: 'sofi', label: 'Sofi-Bank', price: 5600 },
+                { value: 'steam', label: 'Steam', price: 5600 },
+                { value: 'telegram', label: 'Telegram', price: 5700 },
+                { value: 'temu', label: 'Temu', price: 5700 },
+                { value: 'thread', label: 'Thread', price: 5100 },
+                { value: 'tiktok', label: 'Tiktok', price: 1200 },
+                { value: 'twitch', label: 'Twitch', price: 5600 },
+                { value: 'x', label: 'X-Twitter', price: 1100 },
+                { value: 'uber', label: 'Uber', price: 5600 },
+                { value: 'upwork', label: 'Upwork', price: 5600 },
+                { value: 'venmo', label: 'Venmo', price: 5500 },
+                { value: 'viber', label: 'Viber', price: 1100 },
+                { value: 'walmart', label: 'Walmart', price: 500 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 16000 },
+                { value: 'yahoo', label: 'Yahoo', price: 5900 }
+            ],
+            Belgium: [
+                { value: '2redbeans', label: '2red Beans', price: 500 },
+                { value: '3Fun', label: '3Fun', price: 500 },
+                { value: 'aarp', label: 'AARP Rewards', price: 500 },
+                { value: 'acorns', label: 'Acorns', price: 500 },
+                { value: 'alibaba', label: 'Alibaba Cloud', price: 1000 },
+                { value: 'amazon', label: 'Amazon', price: 1300 },
+                { value: 'apple', label: 'Apple', price: 660 },
+                { value: 'badoo', label: 'Badoo', price: 680 },
+                { value: 'bet365', label: 'Bet365', price: 3100 },
+                { value: 'bumble', label: 'Bumble', price: 899 },
+                { value: 'cocacola', label: 'COCA COLA', price: 590 },
+                { value: 'discord', label: 'Discord', price: 690 },
+                { value: 'ebay', label: 'ebay', price: 5900 },
+                { value: 'etoro', label: 'eToro', price: 590 },
+                { value: 'facebook', label: 'Facebook', price: 2500 },
+                { value: 'fiverr', label: 'Fiverr', price: 690 },
+                { value: 'footlocker', label: 'Footlocker', price: 590 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail/', price: 1900 },
+                { value: 'hinge', label: 'Hinge', price: 600 },
+                { value: 'instagram', label: 'Instagram', price: 890 },
+                { value: 'linkedin', label: 'LinkedIn', price: 830 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 600 },
+                { value: 'pof', label: 'POF', price: 590 },
+                { value: 'roblox', label: 'Roblox', price: 800 },
+                { value: 'signal', label: 'Signal', price: 690 },
+                { value: 'snapchat', label: 'Snapchat', price: 699 },
+                { value: 'sofi', label: 'Sofi-Bank', price: 5900 },
+                { value: 'steam', label: 'Steam', price: 590 },
+                { value: 'telegram', label: 'Telegram', price: 600 },
+                { value: 'temu', label: 'Temu', price: 750 },
+                { value: 'thread', label: 'Thread', price: 1200 },
+                { value: 'tiktok', label: 'Tiktok', price: 590 },
+                { value: 'tinder', label: 'Tinder', price: 690 },
+                { value: 'twitch', label: 'Twitch', price: 690 },
+                { value: 'x', label: 'X-Twitter', price: 590 },
+                { value: 'upwork', label: 'Upwork', price: 690 },
+                { value: 'venmo', label: 'Venmo', price: 1200 },
+                { value: 'viber', label: 'Viber', price: 3500 },
+                { value: 'walmart', label: 'Walmart', price: 690 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 3500 },
+                { value: 'yahoo', label: 'Yahoo', price: 700 }
+            ],
+            Italy: [
+                { value: '2redbeans', label: '2red Beans', price: 500 },
+                { value: '3Fun', label: '3Fun', price: 500 },
+                { value: 'aarp', label: 'AARP Rewards', price: 500 },
+                { value: 'acorns', label: 'Acorns', price: 500 },
+                { value: 'alibaba', label: 'Alibaba Cloud', price: 1000 },
+                { value: 'amazon', label: 'Amazon', price: 1300 },
+                { value: 'apple', label: 'Apple', price: 660 },
+                { value: 'badoo', label: 'Badoo', price: 680 },
+                { value: 'bet365', label: 'Bet365', price: 3100 },
+                { value: 'bumble', label: 'Bumble', price: 899 },
+                { value: 'cocacola', label: 'COCA COLA', price: 590 },
+                { value: 'discord', label: 'Discord', price: 690 },
+                { value: 'ebay', label: 'ebay', price: 5900 },
+                { value: 'etoro', label: 'eToro', price: 590 },
+                { value: 'facebook', label: 'Facebook', price: 2500 },
+                { value: 'fiverr', label: 'Fiverr', price: 690 },
+                { value: 'footlocker', label: 'Footlocker', price: 590 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail/', price: 1900 },
+                { value: 'hinge', label: 'Hinge', price: 600 },
+                { value: 'instagram', label: 'Instagram', price: 890 },
+                { value: 'linkedin', label: 'LinkedIn', price: 830 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 600 },
+                { value: 'pof', label: 'POF', price: 590 },
+                { value: 'roblox', label: 'Roblox', price: 800 },
+                { value: 'signal', label: 'Signal', price: 690 },
+                { value: 'snapchat', label: 'Snapchat', price: 699 },
+                { value: 'sofi', label: 'Sofi-Bank', price: 5900 },
+                { value: 'steam', label: 'Steam', price: 590 },
+                { value: 'telegram', label: 'Telegram', price: 600 },
+                { value: 'temu', label: 'Temu', price: 750 },
+                { value: 'thread', label: 'Thread', price: 1200 },
+                { value: 'tiktok', label: 'Tiktok', price: 590 },
+                { value: 'tinder', label: 'Tinder', price: 690 },
+                { value: 'twitch', label: 'Twitch', price: 690 },
+                { value: 'x', label: 'X-Twitter', price: 590 },
+                { value: 'upwork', label: 'Upwork', price: 690 },
+                { value: 'venmo', label: 'Venmo', price: 1200 },
+                { value: 'viber', label: 'Viber', price: 3500 },
+                { value: 'walmart', label: 'Walmart', price: 690 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 3500 },
+                { value: 'yahoo', label: 'Yahoo', price: 700 }
+            ],
+            China: [
+                { value: '2redbeans', label: '2red Beans', price: 500 },
+                { value: '3Fun', label: '3Fun', price: 500 },
+                { value: 'aarp', label: 'AARP Rewards', price: 500 },
+                { value: 'acorns', label: 'Acorns', price: 500 },
+                { value: 'alibaba', label: 'Alibaba Cloud', price: 1000 },
+                { value: 'amazon', label: 'Amazon', price: 1300 },
+                { value: 'apple', label: 'Apple', price: 660 },
+                { value: 'badoo', label: 'Badoo', price: 680 },
+                { value: 'bet365', label: 'Bet365', price: 3100 },
+                { value: 'bumble', label: 'Bumble', price: 899 },
+                { value: 'cocacola', label: 'COCA COLA', price: 590 },
+                { value: 'discord', label: 'Discord', price: 690 },
+                { value: 'ebay', label: 'ebay', price: 5900 },
+                { value: 'etoro', label: 'eToro', price: 590 },
+                { value: 'facebook', label: 'Facebook', price: 2500 },
+                { value: 'fiverr', label: 'Fiverr', price: 690 },
+                { value: 'footlocker', label: 'Footlocker', price: 590 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail/', price: 1900 },
+                { value: 'hinge', label: 'Hinge', price: 600 },
+                { value: 'instagram', label: 'Instagram', price: 890 },
+                { value: 'linkedin', label: 'LinkedIn', price: 830 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 600 },
+                { value: 'pof', label: 'POF', price: 590 },
+                { value: 'roblox', label: 'Roblox', price: 800 },
+                { value: 'signal', label: 'Signal', price: 690 },
+                { value: 'snapchat', label: 'Snapchat', price: 699 },
+                { value: 'sofi', label: 'Sofi-Bank', price: 5900 },
+                { value: 'steam', label: 'Steam', price: 590 },
+                { value: 'telegram', label: 'Telegram', price: 600 },
+                { value: 'temu', label: 'Temu', price: 750 },
+                { value: 'thread', label: 'Thread', price: 1200 },
+                { value: 'tiktok', label: 'Tiktok', price: 590 },
+                { value: 'tinder', label: 'Tinder', price: 690 },
+                { value: 'twitch', label: 'Twitch', price: 690 },
+                { value: 'x', label: 'X-Twitter', price: 590 },
+                { value: 'upwork', label: 'Upwork', price: 690 },
+                { value: 'venmo', label: 'Venmo', price: 1200 },
+                { value: 'viber', label: 'Viber', price: 3500 },
+                { value: 'walmart', label: 'Walmart', price: 690 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 3500 },
+                { value: 'yahoo', label: 'Yahoo', price: 700 }                
+            ],
+            Geogia: [
+                { value: '2redbeans', label: '2red Beans', price: 800 },
+                { value: '3Fun', label: '3Fun', price: 800 },
+                { value: 'aarp', label: 'AARP Rewards', price: 920 },
+                { value: 'acorns', label: 'Acorns', price: 800 },
+                { value: 'amazon', label: 'Amazon', price: 5900 },
+                { value: 'apple', label: 'Apple', price: 5900 },
+                { value: 'badoo', label: 'Badoo', price: 5800 },
+                { value: 'bumble', label: 'Bumble', price: 5900 },
+                { value: 'cocacola', label: 'COCA COLA', price: 590 },
+                { value: 'discord', label: 'Discord', price: 5900 },
+                { value: 'ebay', label: 'ebay', price: 6500 },
+                { value: 'etoro', label: 'eToro', price: 690 },
+                { value: 'facebook', label: 'Facebook', price: 500 },
+                { value: 'fiverr', label: 'Fiverr', price: 1200 },
+                { value: 'footlocker', label: 'Footlocker', price: 800 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail', price: 8900 },
+                { value: 'hinge', label: 'Hinge', price: 690 },
+                { value: 'instagram', label: 'Instagram', price: 5900 },
+                { value: 'linkedin', label: 'LinkedIn', price: 1000 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 5900 },
+                { value: 'roblox', label: 'Roblox', price: 2600 },
+                { value: 'signal', label: 'Signal', price: 2500 },
+                { value: 'skout', label: 'Skout', price: 5900 },
+                { value: 'snapchat', label: 'Snapchat', price: 5500 },
+                { value: 'steam', label: 'Steam', price: 5990 },
+                { value: 'telegram', label: 'Telegram', price: 15000 },
+                { value: 'thread', label: 'Thread', price: 5900 },
+                { value: 'tiktok', label: 'Tiktok', price: 5900 },
+                { value: 'tinder', label: 'Tinder', price: 5900 },
+                { value: 'twitch', label: 'Twitch', price: 5900 },
+                { value: 'x', label: 'X-Twitter', price: 5900 },
+                { value: 'uber', label: 'Uber', price: 1200 },
+                { value: 'venmo', label: 'Venmo', price: 5999 },
+                { value: 'viber', label: 'Viber', price: 1000 },
+                { value: 'walmart', label: 'Walmart', price: 1000 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 16000 },
+                { value: 'yahoo', label: 'Yahoo', price: 5800 }                
+            ],
+            Japan: [
+                { value: '2redbeans', label: '2red Beans', price: 500 },
+                { value: '3Fun', label: '3Fun', price: 500 },
+                { value: 'aarp', label: 'AARP Rewards', price: 500 },
+                { value: 'acorns', label: 'Acorns', price: 500 },
+                { value: 'alibaba', label: 'Alibaba Cloud', price: 1000 },
+                { value: 'amazon', label: 'Amazon', price: 1300 },
+                { value: 'apple', label: 'Apple', price: 660 },
+                { value: 'badoo', label: 'Badoo', price: 680 },
+                { value: 'bet365', label: 'Bet365', price: 3100 },
+                { value: 'bumble', label: 'Bumble', price: 899 },
+                { value: 'cocacola', label: 'COCA COLA', price: 590 },
+                { value: 'discord', label: 'Discord', price: 690 },
+                { value: 'ebay', label: 'ebay', price: 5900 },
+                { value: 'etoro', label: 'eToro', price: 590 },
+                { value: 'facebook', label: 'Facebook', price: 2500 },
+                { value: 'fiverr', label: 'Fiverr', price: 690 },
+                { value: 'footlocker', label: 'Footlocker', price: 590 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail/', price: 1900 },
+                { value: 'hinge', label: 'Hinge', price: 600 },
+                { value: 'instagram', label: 'Instagram', price: 890 },
+                { value: 'linkedin', label: 'LinkedIn', price: 830 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 600 },
+                { value: 'pof', label: 'POF', price: 590 },
+                { value: 'roblox', label: 'Roblox', price: 800 },
+                { value: 'signal', label: 'Signal', price: 690 },
+                { value: 'snapchat', label: 'Snapchat', price: 699 },
+                { value: 'sofi', label: 'Sofi-Bank', price: 5900 },
+                { value: 'steam', label: 'Steam', price: 590 },
+                { value: 'telegram', label: 'Telegram', price: 600 },
+                { value: 'temu', label: 'Temu', price: 750 },
+                { value: 'thread', label: 'Thread', price: 1200 },
+                { value: 'tiktok', label: 'Tiktok', price: 590 },
+                { value: 'tinder', label: 'Tinder', price: 690 },
+                { value: 'twitch', label: 'Twitch', price: 690 },
+                { value: 'x', label: 'X-Twitter', price: 590 },
+                { value: 'upwork', label: 'Upwork', price: 690 },
+                { value: 'venmo', label: 'Venmo', price: 1200 },
+                { value: 'viber', label: 'Viber', price: 3500 },
+                { value: 'walmart', label: 'Walmart', price: 690 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 3500 },
+                { value: 'yahoo', label: 'Yahoo', price: 700 }                  
+            ],
+            Cameroon: [
+                { value: '2redbeans', label: '2red Beans', price: 500 },
+                { value: '3Fun', label: '3Fun', price: 500 },
+                { value: 'aarp', label: 'AARP Rewards', price: 500 },
+                { value: 'acorns', label: 'Acorns', price: 500 },
+                { value: 'alibaba', label: 'Alibaba Cloud', price: 1000 },
+                { value: 'amazon', label: 'Amazon', price: 1300 },
+                { value: 'apple', label: 'Apple', price: 660 },
+                { value: 'badoo', label: 'Badoo', price: 680 },
+                { value: 'bet365', label: 'Bet365', price: 3100 },
+                { value: 'bumble', label: 'Bumble', price: 899 },
+                { value: 'cocacola', label: 'COCA COLA', price: 590 },
+                { value: 'discord', label: 'Discord', price: 690 },
+                { value: 'ebay', label: 'ebay', price: 5900 },
+                { value: 'etoro', label: 'eToro', price: 590 },
+                { value: 'facebook', label: 'Facebook', price: 2500 },
+                { value: 'fiverr', label: 'Fiverr', price: 690 },
+                { value: 'footlocker', label: 'Footlocker', price: 590 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail/', price: 1900 },
+                { value: 'hinge', label: 'Hinge', price: 600 },
+                { value: 'instagram', label: 'Instagram', price: 890 },
+                { value: 'linkedin', label: 'LinkedIn', price: 830 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 600 },
+                { value: 'pof', label: 'POF', price: 590 },
+                { value: 'roblox', label: 'Roblox', price: 800 },
+                { value: 'signal', label: 'Signal', price: 690 },
+                { value: 'snapchat', label: 'Snapchat', price: 699 },
+                { value: 'sofi', label: 'Sofi-Bank', price: 5900 },
+                { value: 'steam', label: 'Steam', price: 590 },
+                { value: 'telegram', label: 'Telegram', price: 600 },
+                { value: 'temu', label: 'Temu', price: 750 },
+                { value: 'thread', label: 'Thread', price: 1200 },
+                { value: 'tiktok', label: 'Tiktok', price: 590 },
+                { value: 'tinder', label: 'Tinder', price: 690 },
+                { value: 'twitch', label: 'Twitch', price: 690 },
+                { value: 'x', label: 'X-Twitter', price: 590 },
+                { value: 'upwork', label: 'Upwork', price: 690 },
+                { value: 'venmo', label: 'Venmo', price: 1200 },
+                { value: 'viber', label: 'Viber', price: 3500 },
+                { value: 'walmart', label: 'Walmart', price: 690 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 3500 },
+                { value: 'yahoo', label: 'Yahoo', price: 700 }  
+            ],
+            Mexico: [
+                { value: '2redbeans', label: '2red Beans', price: 500 },
+                { value: '3Fun', label: '3Fun', price: 500 },
+                { value: 'aarp', label: 'AARP Rewards', price: 500 },
+                { value: 'acorns', label: 'Acorns', price: 500 },
+                { value: 'alibaba', label: 'Alibaba Cloud', price: 1000 },
+                { value: 'amazon', label: 'Amazon', price: 1300 },
+                { value: 'apple', label: 'Apple', price: 660 },
+                { value: 'badoo', label: 'Badoo', price: 680 },
+                { value: 'bet365', label: 'Bet365', price: 3100 },
+                { value: 'bumble', label: 'Bumble', price: 899 },
+                { value: 'cocacola', label: 'COCA COLA', price: 590 },
+                { value: 'discord', label: 'Discord', price: 690 },
+                { value: 'ebay', label: 'ebay', price: 5900 },
+                { value: 'etoro', label: 'eToro', price: 590 },
+                { value: 'facebook', label: 'Facebook', price: 2500 },
+                { value: 'fiverr', label: 'Fiverr', price: 690 },
+                { value: 'footlocker', label: 'Footlocker', price: 590 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail/', price: 1900 },
+                { value: 'hinge', label: 'Hinge', price: 600 },
+                { value: 'instagram', label: 'Instagram', price: 890 },
+                { value: 'linkedin', label: 'LinkedIn', price: 830 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 600 },
+                { value: 'pof', label: 'POF', price: 590 },
+                { value: 'roblox', label: 'Roblox', price: 800 },
+                { value: 'signal', label: 'Signal', price: 690 },
+                { value: 'snapchat', label: 'Snapchat', price: 699 },
+                { value: 'sofi', label: 'Sofi-Bank', price: 5900 },
+                { value: 'steam', label: 'Steam', price: 590 },
+                { value: 'telegram', label: 'Telegram', price: 600 },
+                { value: 'temu', label: 'Temu', price: 750 },
+                { value: 'thread', label: 'Thread', price: 1200 },
+                { value: 'tiktok', label: 'Tiktok', price: 590 },
+                { value: 'tinder', label: 'Tinder', price: 690 },
+                { value: 'twitch', label: 'Twitch', price: 690 },
+                { value: 'x', label: 'X-Twitter', price: 590 },
+                { value: 'upwork', label: 'Upwork', price: 690 },
+                { value: 'venmo', label: 'Venmo', price: 1200 },
+                { value: 'viber', label: 'Viber', price: 3500 },
+                { value: 'walmart', label: 'Walmart', price: 690 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 3500 },
+                { value: 'yahoo', label: 'Yahoo', price: 700 }
+            ],
+            Ghana: [
+                { value: '2redbeans', label: '2red Beans', price: 500 },
+                { value: '3Fun', label: '3Fun', price: 500 },
+                { value: 'aarp', label: 'AARP Rewards', price: 500 },
+                { value: 'acorns', label: 'Acorns', price: 500 },
+                { value: 'alibaba', label: 'Alibaba Cloud', price: 1000 },
+                { value: 'amazon', label: 'Amazon', price: 1300 },
+                { value: 'apple', label: 'Apple', price: 660 },
+                { value: 'badoo', label: 'Badoo', price: 680 },
+                { value: 'bet365', label: 'Bet365', price: 3100 },
+                { value: 'bumble', label: 'Bumble', price: 899 },
+                { value: 'cocacola', label: 'COCA COLA', price: 590 },
+                { value: 'discord', label: 'Discord', price: 690 },
+                { value: 'ebay', label: 'ebay', price: 5900 },
+                { value: 'etoro', label: 'eToro', price: 590 },
+                { value: 'facebook', label: 'Facebook', price: 2500 },
+                { value: 'fiverr', label: 'Fiverr', price: 690 },
+                { value: 'footlocker', label: 'Footlocker', price: 590 },
+                { value: 'googlegmailyoutube', label: 'Google/Gmail/', price: 1900 },
+                { value: 'hinge', label: 'Hinge', price: 600 },
+                { value: 'instagram', label: 'Instagram', price: 890 },
+                { value: 'linkedin', label: 'LinkedIn', price: 830 },
+                { value: 'microsoftoutlookhotmail', label: 'Microsoft/Outlook/Hotmail', price: 600 },
+                { value: 'pof', label: 'POF', price: 590 },
+                { value: 'roblox', label: 'Roblox', price: 800 },
+                { value: 'signal', label: 'Signal', price: 690 },
+                { value: 'snapchat', label: 'Snapchat', price: 699 },
+                { value: 'sofi', label: 'Sofi-Bank', price: 5900 },
+                { value: 'steam', label: 'Steam', price: 590 },
+                { value: 'telegram', label: 'Telegram', price: 600 },
+                { value: 'temu', label: 'Temu', price: 750 },
+                { value: 'thread', label: 'Thread', price: 1200 },
+                { value: 'tiktok', label: 'Tiktok', price: 590 },
+                { value: 'tinder', label: 'Tinder', price: 690 },
+                { value: 'twitch', label: 'Twitch', price: 690 },
+                { value: 'x', label: 'X-Twitter', price: 590 },
+                { value: 'upwork', label: 'Upwork', price: 690 },
+                { value: 'venmo', label: 'Venmo', price: 1200 },
+                { value: 'viber', label: 'Viber', price: 3500 },
+                { value: 'walmart', label: 'Walmart', price: 690 },
+                { value: 'whatsapp', label: 'WhatsApp', price: 3500 },
+                { value: 'yahoo', label: 'Yahoo', price: 700 }
+            ]
+        };
+
+        document.getElementById('country').addEventListener('change', function() {
+            const country = this.value;
+            const serviceSelect = document.getElementById('service');
+            const priceInput = document.getElementById('price');
+            serviceSelect.innerHTML = '';
+
+            if (serviceMap[country] && serviceMap[country].length > 0) {
+                serviceMap[country].forEach(service => {
+                    const opt = document.createElement('option');
+                    opt.value = service.value;
+                    opt.textContent = service.label;
+                    serviceSelect.appendChild(opt);
+                });
+                // Auto-select first service and show price
+                serviceSelect.selectedIndex = 0;
+                priceInput.value = serviceMap[country][0].price;
+            } else {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Select Service';
+                serviceSelect.appendChild(opt);
+                priceInput.value = '';
+            }
+        });
+
+        document.getElementById('service').addEventListener('change', function() {
+            const country = document.getElementById('country').value;
+            const service = this.value;
+            const priceInput = document.getElementById('price');
+            const found = (serviceMap[country] || []).find(s => s.value === service);
+            priceInput.value = found ? found.price : '';
+        });
+    </script>
+</body>
+</html>

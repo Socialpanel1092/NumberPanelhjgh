@@ -4,7 +4,7 @@
 .menu-icon {
     position: absolute;
     top: 24px;
-    right: 24px;
+        right: 24px;
     left: auto;
     width: 44px;
     height: 44px;
@@ -25,7 +25,7 @@
 }
 .menu-icon-bar {
     width: 26px;
-    height: ;
+    height: 4px;
     background: #1a73e8;
     margin: 0 0 5px 0;
     border-radius: 2px;
@@ -58,7 +58,7 @@
     align-items: stretch;
     padding-top: 2rem;
     z-index: 1000;
-    transition: right 0.35s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.3s;
+        transition: right 0.35s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.3s;
 }
 .side-menu.closed {
     right: -260px;
@@ -183,11 +183,12 @@
     padding: 0.9rem 1.5rem;
     border-radius: 20px 0 0 20px;
     font-weight: 500;
-    transition: background 0.2s, color 0.2s;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
 }
 .side-menu ul li a.active, .side-menu ul li a:hover {
     background: #fff;
     color: #1a73e8;
+    box-shadow: 2px 0 8px #1a73e81a;
 }
 .side-menu .logout {
     margin-top: auto;
