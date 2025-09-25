@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="side-menu">
+        <!-- ...side menu will be included in all pages... -->
+    </div>
+    <div class="main-content">
+        <div class="transaction-card" style="max-width:480px;margin:3rem auto 0 auto;background:#fff;border-radius:30px;box-shadow:0 8px 32px rgba(26,115,232,0.13);padding:2.5rem 2rem 2rem 2rem;animation:float-bounce 2.5s cubic-bezier(.68,-0.55,.27,1.55) infinite alternate;position:relative;overflow:hidden;">
+            <h1 style="text-align:center;color:#1a73e8;margin-bottom:1.5rem;position:relative;z-index:1;">Transaction History</h1>
+            <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">
+                <thead>
+                    <tr style="background:#f8fafc;color:#1a73e8;font-weight:700;">
+                        <th style="padding:0.7rem 0.3rem;">Date</th>
+                        <th style="padding:0.7rem 0.3rem;">Type</th>
+                        <th style="padding:0.7rem 0.3rem;">Amount</th>
+                        <th style="padding:0.7rem 0.3rem;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="txnBody">
+                    <!-- Transactions will be loaded here -->
+                </tbody>
+            </table>
+            <div style="text-align:center;font-size:1.05rem;color:#333;">Need help? Email: <a href="mailto:your@email.com" style="color:#1a73e8;font-weight:600;">your@email.com</a></div>
+        </div>
+    </div>
+    <script>
+    // Example: Load dummy transactions (replace with real data)
+    const txns = [
+        {date:'2025-09-24',type:'Order',amount:'₦2500',status:'Success'},
+        {date:'2025-09-23',type:'Add Funds',amount:'₦5000',status:'Pending'},
+        {date:'2025-09-22',type:'Order',amount:'₦1200',status:'Failed'}
+    ];
+    const tbody = document.getElementById('txnBody');
+    txns.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td style='padding:0.6rem 0.3rem;'>${t.date}</td><td style='padding:0.6rem 0.3rem;'>${t.type}</td><td style='padding:0.6rem 0.3rem;'>${t.amount}</td><td style='padding:0.6rem 0.3rem;'>${t.status}</td>`;
+        tbody.appendChild(tr);
+    });
+    </script>
+</body>
+</html>

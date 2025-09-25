@@ -1,0 +1,213 @@
+<script>
+async function fundWallet() {
+  const amount = document.getElementById('amount').value;
+  const email = document.getElementById('email').value;
+  const phone = document.getElementById('phone').value;
+  const name = document.getElementById('name').value;
+  if (!amount || !email || !phone || !name) {
+    alert('Please fill all fields');
+    return;
+  }
+  try {
+    const res = await fetch('/api/flutterwave-pay', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount, email, phone, name })
+    });
+    const data = await res.json();
+    if (data.status === 'success' && data.data && data.data.link) {
+      window.location.href = data.data.link; // Redirect to Flutterwave payment page
+    } else {
+      alert('Failed to initiate payment.');
+    }
+  } catch (err) {
+    alert('Error connecting to funding server.');
+  }
+}
+</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://checkout.flutterwave.com/v3.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Funds</title>
+    <style>
+    .spinner {
+      display: none;
+      margin: 1.5rem auto 0 auto;
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #FFD600;
+      border-radius: 50%;
+      width: 300px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .processing-text {
+      display: none;
+      color: #FFD600;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 1rem;
+    }
+    body { font-family: Arial, sans-serif; background: #181818; margin: 0; }
+    .container {
+      width: 370px;
+      margin: 7rem auto;
+      background: #111;
+      border-radius: 50px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.35), 0 0 0 8px #000;
+      padding: 2.5rem 2.2rem 2.2rem 2.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: bounceIn 1.2s cubic-bezier(.68,-0.55,.27,1.55) both;
+    }
+    @keyframes bounceIn {
+      0% { transform: scale(0.7); box-shadow: 0 0 0 0 #000; }
+      60% { transform: scale(1.1); box-shadow: 0 0 0 16px #000; }
+      80% { transform: scale(0.95); }
+      100% { transform: scale(1); box-shadow: 0 8px 32px rgba(0,0,0,0.35), 0 0 0 8px #000; }
+    }
+    .socialpanel-title {
+      font-family: 'Segoe UI Black', Arial, sans-serif;
+      font-size: 2.3rem;
+      color: #ff2222;
+      text-align: center;
+      letter-spacing: 2px;
+      margin-bottom: 0.2rem;
+      font-weight: bold;
+      text-shadow: 0 2px 12px #000, 0 0 2px #ff2222;
+    }
+    .subtitle {
+      color: #fff;
+      text-align: center;
+      margin-bottom: 2.2rem;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+    }
+    .form-group { position: relative; margin-bottom: 2rem; }
+    .form-group input {
+      width: 320px;
+      padding: 1.2rem 0.7rem 0.5rem 0.7rem;
+      border-radius: 18px;
+      border: 3.5px solid #222;
+      background: #222;
+      color: #fff;
+      font-size: 1.08rem;
+      outline: none;
+      transition: box-shadow 0.2s, border-color 0.2s;
+      font-weight: 500;
+    }
+    .form-group input::placeholder {
+      color: #888;
+      opacity: 1;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    .form-group input:focus {
+      border-color: #ff2222;
+      box-shadow: 0 0 0 3px #ff222244;
+    }
+    .form-group label {
+      position: absolute;
+      top: 1.2rem;
+      left: 0.8rem;
+      color: #bbb;
+      font-size: 1rem;
+      pointer-events: none;
+      transition: 0.2s ease all;
+      background: #222;
+      padding: 0 0.2rem;
+      border-radius: 8px;
+    }
+    .form-group input:focus + label,
+    .form-group input:not(:placeholder-shown) + label {
+      top: -0.7rem;
+      left: 0.6rem;
+      font-size: 0.85rem;
+      color: #ff2222;
+      background: #111;
+    }
+    .deposit-btn {
+      background: #fff;
+      color: #111;
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      width: 300px;
+      font-weight: bold;
+      margin-bottom: 0.7rem;
+      box-shadow: 0 2px 8px rgba(255,255,255,0.08);
+      transition: background 0.2s, color 0.2s, transform 0.15s;
+    }
+    .deposit-btn:hover {
+      background: #ff2222;
+      color: #fff;
+      transform: scale(1.04);
+    }
+    .status {
+      text-align: center;
+      color: #ff2222;
+      margin-top: 1rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    @media (max-width: 500px) {
+      .container { width: 98vw; padding: 1rem; border-radius: 20px; }
+      .form-group input { width: 90vw; }
+      .deposit-btn { width: 90vw; }
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="text-align:center;">Add Funds</h2>
+    <form id="fundForm" onsubmit="event.preventDefault(); fundWallet();">
+      <div class="form-group">
+        <input type="number" id="amount" name="amount" placeholder=" " required class="bouncy-border">
+        <label for="amount">Enter Amount</label>
+      </div>
+  <button type="submit" class="deposit-btn">Fund Wallet</button>
+    </form>
+    <div class="spinner" id="spinner"></div>
+    <div class="processing-text" id="processingText">Processing...</div>
+    <div id="accountDetails" style="display:none;margin-top:2rem;text-align:center;"></div>
+    <div id="status" class="status"></div>
+    </div>
+    <script src="https://checkout.flutterwave.com/v3.js"></script>
+    <script>
+    function fundWallet() {
+      const amount = document.getElementById('amount').value;
+      if (!amount) {
+        alert('Please enter an amount');
+        return;
+      }
+      FlutterwaveCheckout({
+        public_key: "FLWPUBK_TEST-9c02871359faf715e7455097eabf480b-X", // Use your public key
+        tx_ref: "tx-" + Date.now(),
+        amount: amount,
+        currency: "NGN",
+        payment_options: "card,banktransfer,ussd",
+        redirect_url: "https://your-frontend-url.com/payment-success", // Change to your actual redirect URL
+        customer: {
+          email: "user@example.com", // You can make this dynamic
+          phonenumber: "", // Optional
+          name: "Wallet User" // Optional
+        },
+        customizations: {
+          title: "Wallet Funding",
+          description: "Fund your wallet with Flutterwave",
+          logo: "https://your-frontend-url.com/logo.png" // Optional
+        }
+      });
+    }
+    </script>
+</script>
+</body>
+</html>

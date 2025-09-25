@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        .success-card {
+            max-width: 420px;
+            margin: 5rem auto;
+            background: #fff;
+            border-radius: 30px;
+            box-shadow: 0 8px 32px rgba(26,115,232,0.13);
+            padding: 2.5rem 2rem 2rem 2rem;
+            animation: float-bounce 2.5s cubic-bezier(.68,-0.55,.27,1.55) 1;
+            text-align: center;
+        }
+        .success-card h1 { color: #1a73e8; margin-bottom: 1.2rem; }
+        .success-card .msg { color: #222; font-size: 1.1rem; margin-bottom: 1.5rem; }
+        .success-card .error { color: #e41a1c; margin-bottom: 1.5rem; }
+        .success-card .btn { background: linear-gradient(90deg, #1a73e8 60%, #4fc3f7 100%); color: #fff; border: none; padding: 0.8rem 2rem; border-radius: 20px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
+        .success-card .btn:hover { background: linear-gradient(90deg, #155ab6 60%, #29b6f6 100%); }
+    </style>
+</head>
+<body>
+    <div class="success-card">
+        <h1>Payment Success</h1>
+        <div class="msg" id="successMsg">Verifying your payment...</div>
+        <div class="error" id="errorMsg"></div>
+        <button class="btn" onclick="window.location.href='dashboard.html'">Go to Dashboard</button>
+    </div>
+    <script>
+    async function verifyPayment() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tx_ref = urlParams.get('tx_ref');
+        const transaction_id = urlParams.get('transaction_id');
+        if (!transaction_id) {
+            document.getElementById('errorMsg').textContent = 'No transaction ID found.';
+            document.getElementById('successMsg').textContent = '';
+            return;
+        }
+        try {
+            const res = await fetch('/api/verify-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transaction_id })
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                const amount = data.data.amount;
+                let balance = localStorage.getItem('balance') ? parseFloat(localStorage.getItem('balance')) : 0;
+                balance += Number(amount);
+                localStorage.setItem('balance', balance.toFixed(2));
+                document.getElementById('successMsg').textContent = 'Payment verified! ₦' + amount + ' added to your account.';
+                document.getElementById('errorMsg').textContent = '';
+            } else {
+                document.getElementById('errorMsg').textContent = 'Payment verification failed. Contact support.';
+                document.getElementById('successMsg').textContent = '';
+            }
+        } catch (err) {
+            document.getElementById('errorMsg').textContent = 'Error verifying payment.';
+            document.getElementById('successMsg').textContent = '';
+        }
+    }
+    verifyPayment();
+    </script>
+</body>
+</html>

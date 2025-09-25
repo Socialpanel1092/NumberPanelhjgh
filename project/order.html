@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        .order-card {
+            max-width: 420px;
+            margin: 3rem auto 0 auto;
+            background: #fff;
+            border-radius: 30px;
+            box-shadow: 0 8px 32px rgba(26,115,232,0.13);
+            padding: 2.5rem 2rem 2rem 2rem;
+            animation: float-bounce 2.5s cubic-bezier(.68,-0.55,.27,1.55) infinite alternate;
+            position: relative;
+            overflow: hidden;
+        }
+        @keyframes float-bounce {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-12px) scale(1.04); box-shadow: 0 16px 48px rgba(26,115,232,0.18); }
+            100% { transform: translateY(0) scale(1); }
+        }
+        .order-card::before {
+            content: '';
+            position: absolute;
+            top: -60px; left: -60px;
+            width: 180px; height: 180px;
+            background: linear-gradient(135deg, #1a73e8 60%, #4fc3f7 100%);
+            border-radius: 50%;
+            opacity: 0.13;
+            z-index: 0;
+            animation: spin 8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .order-card h1 {
+            text-align: center;
+            color: #1a73e8;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        .order-card p {
+            text-align: center;
+            color: #333;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        .order-btn {
+            display: block;
+            width: 100%;
+            padding: 0.9rem;
+            border-radius: 20px;
+            background: linear-gradient(90deg, #1a73e8 60%, #4fc3f7 100%);
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(26,115,232,0.10);
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            z-index: 1;
+        }
+        .order-btn:hover {
+            background: linear-gradient(90deg, #155ab6 60%, #29b6f6 100%);
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 8px 24px rgba(26,115,232,0.18);
+        }
+    </style>
+</head>
+<body>
+    <div class="side-menu">
+        <!-- ...side menu will be included in all pages... -->
+    </div>
+    <div class="main-content">
+        <div class="order-card">
+            <h1>Order Page</h1>
+            <div id="order-receipt" style="display:none;"></div>
+            <p id="order-desc">Place and manage your orders here.</p>
+            <button class="order-btn" onclick="window.location.href='dashboard.html'">Create New Order</button>
+        </div>
+    </div>
+<script>
+// Show receipt if redirected from dashboard order
+const receiptDiv = document.getElementById('order-receipt');
+const descP = document.getElementById('order-desc');
+const order = localStorage.getItem('latestOrder');
+if (order) {
+    const data = JSON.parse(order);
+    receiptDiv.style.display = 'block';
+    descP.style.display = 'none';
+    receiptDiv.innerHTML = `
+        <div style="text-align:center; margin-bottom:1.5rem;">
+            <h2 style="color:#1a73e8; margin-bottom:0.5rem;">Order Receipt</h2>
+            <div style="font-size:1.1rem; color:#333; margin-bottom:0.5rem;">Country: <b>${data.country}</b></div>
+            <div style="font-size:1.1rem; color:#333; margin-bottom:0.5rem;">Service: <b>${data.service}</b></div>
+            <div style="font-size:1.1rem; color:#333; margin-bottom:0.5rem;">Price: <b>₦${data.price}</b></div>
+            <div style="font-size:1.1rem; color:#333;">Date: <b>${data.date}</b></div>
+        </div>
+    `;
+    // Optionally clear after showing
+    // localStorage.removeItem('latestOrder');
+}
+</script>
+</body>
+</html>

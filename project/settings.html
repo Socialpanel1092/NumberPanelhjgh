@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+    .modal-bg {
+        display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(30,42,70,0.18); align-items: center; justify-content: center;
+    }
+    .modal {
+        background: #fff; border-radius: 20px; box-shadow: 0 8px 32px rgba(26,115,232,0.13); padding: 2rem 1.5rem; max-width: 350px; width: 95vw; position: relative; animation: float-bounce 0.7s;
+    }
+    .modal h2 { color: #1a73e8; margin-bottom: 1rem; }
+    .modal label { font-weight: 600; display: block; margin-bottom: 0.3rem; }
+    .modal input, .modal select { width: 100%; padding: 0.7rem; border-radius: 12px; border: 1px solid #ccc; margin-bottom: 1.1rem; font-size: 1rem; }
+    .modal button { width: 100%; padding: 0.7rem; border-radius: 20px; background: linear-gradient(90deg,#1a73e8 60%,#4fc3f7 100%); color: #fff; font-weight: 700; border: none; font-size: 1rem; cursor: pointer; }
+    .modal .close-modal { position: absolute; top: 10px; right: 18px; font-size: 1.5rem; color: #1a73e8; background: none; border: none; cursor: pointer; }
+    .modal .success-msg { color: #1a73e8; text-align: center; margin-bottom: 1rem; font-weight: 600; }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <!-- Modals for settings -->
+    <div id="modal-bg" class="modal-bg"></div>
+    <div class="side-menu">
+        <!-- ...side menu will be included in all pages... -->
+    </div>
+    <div class="main-content">
+        <div class="settings-card" style="max-width:420px;margin:3rem auto 0 auto;background:#fff;border-radius:30px;box-shadow:0 8px 32px rgba(26,115,232,0.13);padding:2.5rem 2rem 2rem 2rem;animation:float-bounce 2.5s cubic-bezier(.68,-0.55,.27,1.55) infinite alternate;position:relative;overflow:hidden;">
+            <h1 style="text-align:center;color:#1a73e8;margin-bottom:1.5rem;position:relative;z-index:1;">Settings</h1>
+            <ul style="list-style:none;padding:0;margin:0 0 2rem 0;">
+                <li style="margin-bottom:1.2rem;"><button class="settings-btn" id="changePwdBtn" style="width:100%;padding:0.8rem;border-radius:20px;background:linear-gradient(90deg,#1a73e8 60%,#4fc3f7 100%);color:#fff;font-weight:700;border:none;font-size:1rem;cursor:pointer;transition:background 0.2s;">Change Password</button></li>
+                <li style="margin-bottom:1.2rem;"><button class="settings-btn" id="notifPrefBtn" style="width:100%;padding:0.8rem;border-radius:20px;background:linear-gradient(90deg,#1a73e8 60%,#4fc3f7 100%);color:#fff;font-weight:700;border:none;font-size:1rem;cursor:pointer;transition:background 0.2s;">Notification Preferences</button></li>
+                <li style="margin-bottom:1.2rem;"><button class="settings-btn" id="privacyBtn" style="width:100%;padding:0.8rem;border-radius:20px;background:linear-gradient(90deg,#1a73e8 60%,#4fc3f7 100%);color:#fff;font-weight:700;border:none;font-size:1rem;cursor:pointer;transition:background 0.2s;">Privacy Settings</button></li>
+            </ul>
+            <form id="reportForm" style="background:#f8fafc;padding:1.2rem 1rem;border-radius:20px;box-shadow:0 2px 8px rgba(26,115,232,0.07);">
+                <h2 style="color:#1a73e8;font-size:1.1rem;margin-bottom:0.7rem;">Report a Problem</h2>
+                <textarea id="problemText" required placeholder="Describe your problem..." style="width:100%;min-height:70px;border-radius:12px;border:1px solid #ccc;padding:0.7rem;margin-bottom:0.7rem;"></textarea>
+                <input type="email" id="userEmail" required placeholder="Your email (for reply)" style="width:100%;border-radius:12px;border:1px solid #ccc;padding:0.7rem;margin-bottom:0.7rem;">
+                <button type="submit" style="width:100%;padding:0.7rem;border-radius:20px;background:linear-gradient(90deg,#1a73e8 60%,#4fc3f7 100%);color:#fff;font-weight:700;border:none;font-size:1rem;cursor:pointer;">Send Report</button>
+                <div id="reportStatus" style="margin-top:0.7rem;text-align:center;color:#1a73e8;font-weight:600;"></div>
+            </form>
+        </div>
+    </div>
+    <script>
+    // Modal logic
+    const modalBg = document.getElementById('modal-bg');
+    function showModal(contentHtml) {
+        modalBg.innerHTML = `<div class='modal'>${contentHtml}<button class='close-modal' onclick='closeModal()'>&times;</button></div>`;
+        modalBg.style.display = 'flex';
+    }
+    function closeModal() { modalBg.style.display = 'none'; modalBg.innerHTML = ''; }
+    // Change Password
+    document.getElementById('changePwdBtn').onclick = function() {
+        showModal(`
+            <h2>Change Password</h2>
+            <form id='pwdForm'>
+                <label>Current Password</label>
+                <input type='password' required>
+                <label>New Password</label>
+                <input type='password' required>
+                <label>Confirm New Password</label>
+                <input type='password' required>
+                <button type='submit'>Change Password</button>
+                <div id='pwdMsg' class='success-msg'></div>
+            </form>
+        `);
+        document.getElementById('pwdForm').onsubmit = function(e) {
+            e.preventDefault();
+            document.getElementById('pwdMsg').textContent = 'Password changed successfully!';
+            setTimeout(closeModal, 1200);
+        };
+    };
+    // Notification Preferences
+    document.getElementById('notifPrefBtn').onclick = function() {
+        showModal(`
+            <h2>Notification Preferences</h2>
+            <form id='notifForm'>
+                <label>Email Notifications</label>
+                <select><option>Enabled</option><option>Disabled</option></select>
+                <label>SMS Notifications</label>
+                <select><option>Enabled</option><option>Disabled</option></select>
+                <button type='submit'>Save Preferences</button>
+                <div id='notifMsg' class='success-msg'></div>
+            </form>
+        `);
+        document.getElementById('notifForm').onsubmit = function(e) {
+            e.preventDefault();
+            document.getElementById('notifMsg').textContent = 'Preferences saved!';
+            setTimeout(closeModal, 1200);
+        };
+    };
+    // Privacy Settings
+    document.getElementById('privacyBtn').onclick = function() {
+        showModal(`
+            <h2>Privacy Settings</h2>
+            <form id='privacyForm'>
+                <label>Show Profile Publicly</label>
+                <select><option>Yes</option><option>No</option></select>
+                <label>Allow Search by Email</label>
+                <select><option>Yes</option><option>No</option></select>
+                <button type='submit'>Save Settings</button>
+                <div id='privacyMsg' class='success-msg'></div>
+            </form>
+        `);
+        document.getElementById('privacyForm').onsubmit = function(e) {
+            e.preventDefault();
+            document.getElementById('privacyMsg').textContent = 'Privacy settings updated!';
+            setTimeout(closeModal, 1200);
+        };
+    };
+    document.getElementById('reportForm').onsubmit = function(e) {
+        e.preventDefault();
+        document.getElementById('reportStatus').textContent = 'Sending...';
+        // Simulate sending (replace with real API/email integration)
+        setTimeout(function() {
+            document.getElementById('reportStatus').textContent = 'Report sent! We will contact you at your email.';
+        }, 1200);
+        // To send to your mail, integrate with backend or email API
+    };
+    </script>
+</body>
+</html>

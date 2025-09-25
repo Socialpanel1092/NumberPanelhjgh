@@ -1,0 +1,10 @@
+# Code Citation
+
+This project uses open-source packages:
+- express
+- mongodb
+- cors
+- dotenv
+- twilio
+
+All code is original or adapted for business use. See package.json for details.

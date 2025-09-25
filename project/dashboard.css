@@ -1,0 +1,246 @@
+/* Hamburger Side Menu Icon */
+/* Hamburger Side Menu Icon - Enhanced */
+/* Hamburger menu icon inside right side menu */
+.menu-icon {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    left: auto;
+    width: 44px;
+    height: 44px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(26,115,232,0.13);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2001;
+    transition: box-shadow 0.2s, background 0.2s;
+    border: 2px solid #e0e7ef;
+}
+.menu-icon.active, .menu-icon:hover {
+    box-shadow: 0 8px 24px rgba(26,115,232,0.18);
+    background: #e3f0fd;
+}
+.menu-icon-bar {
+    width: 26px;
+    height: ;
+    background: #1a73e8;
+    margin: 0 0 5px 0;
+    border-radius: 2px;
+    transition: all 0.3s;
+}
+.menu-icon.active .menu-icon-bar:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+.menu-icon.active .menu-icon-bar:nth-child(2) {
+    opacity: 0;
+}
+.menu-icon.active .menu-icon-bar:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+.menu-icon-bar:last-child { margin-bottom: 0; }
+@media (max-width: 700px) {
+    .menu-icon { left: 12px; top: 12px; width: 38px; height: 38px; }
+    .menu-icon-bar { width: 20px; }
+}
+.side-menu {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 220px;
+    height: 100vh;
+    background: linear-gradient(135deg, #1a73e8 60%, #4fc3f7 100%);
+    box-shadow: -2px 0 16px rgba(26,115,232,0.13);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding-top: 2rem;
+    z-index: 1000;
+    transition: right 0.35s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.3s;
+}
+.side-menu.closed {
+    right: -260px;
+    opacity: 0.1;
+    pointer-events: none;
+}
+.side-menu ul li a {
+    position: relative;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.side-menu ul li a.active, .side-menu ul li a:focus, .side-menu ul li a:active {
+    background: #fff;
+    color: #1a73e8;
+    box-shadow: 2px 0 8px #1a73e81a;
+}
+.side-menu ul li a::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 6px;
+    border-radius: 6px 0 0 6px;
+    background: #1a73e8;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.side-menu ul li a.active::before {
+    opacity: 1;
+}
+/* Animated Floating Card Styles */
+.container {
+    max-width: 400px;
+    margin: 3rem auto;
+    background: #fff;
+    border-radius: 30px;
+    box-shadow: 0 8px 32px rgba(26,115,232,0.13);
+    padding: 2.5rem 2rem 2rem 2rem;
+    animation: float-bounce 2.5s cubic-bezier(.68,-0.55,.27,1.55) infinite alternate;
+}
+@keyframes float-bounce {
+    0% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-12px) scale(1.04); }
+    100% { transform: translateY(0) scale(1); }
+}
+.container h1 {
+    text-align: center;
+    color: #1a73e8;
+    margin-bottom: 1.5rem;
+}
+.container .balance {
+    text-align: center;
+    font-size: 1.3rem;
+    color: #222;
+    margin-bottom: 1.5rem;
+}
+.container label {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    display: block;
+}
+.container select, .container .price, .container button {
+    width: 100%;
+    padding: 0.7rem;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    margin-bottom: 1.2rem;
+    font-size: 1rem;
+}
+.container button {
+    background: linear-gradient(90deg, #1a73e8 60%, #4fc3f7 100%);
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.container button:hover {
+    background: linear-gradient(90deg, #155ab6 60%, #29b6f6 100%);
+}
+.container .error {
+    color: #e41a1c;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+/* Advanced Side Menu Styles */
+.side-menu {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 220px;
+    height: 100vh;
+    background: linear-gradient(135deg, #1a73e8 60%, #4fc3f7 100%);
+    box-shadow: -2px 0 16px rgba(26,115,232,0.13);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding-top: 2rem;
+    z-index: 1000;
+}
+.side-menu .menu-title {
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2rem;
+    letter-spacing: 1px;
+}
+.side-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+}
+.side-menu ul li {
+    margin: 0.5rem 0;
+}
+.side-menu ul li a {
+    display: block;
+    color: #fff;
+    text-decoration: none;
+    padding: 0.9rem 1.5rem;
+    border-radius: 20px 0 0 20px;
+    font-weight: 500;
+    transition: background 0.2s, color 0.2s;
+}
+.side-menu ul li a.active, .side-menu ul li a:hover {
+    background: #fff;
+    color: #1a73e8;
+}
+.side-menu .logout {
+    margin-top: auto;
+    padding: 1.5rem 1rem 1rem 1rem;
+    border-top: 1px solid #fff3;
+}
+.side-menu .logout a {
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+    display: block;
+    background: #e41a1c;
+    border-radius: 20px 0 0 20px;
+    padding: 0.9rem 1.5rem;
+    transition: background 0.2s, color 0.2s;
+}
+.side-menu .logout a:hover {
+    background: #fff;
+    color: #e41a1c;
+}
+@media (max-width: 700px) {
+    .side-menu {
+        width: 100vw;
+        height: auto;
+        position: static;
+        flex-direction: row;
+        padding-top: 0;
+        box-shadow: none;
+    }
+    .side-menu ul {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+    }
+    .side-menu ul li a, .side-menu .logout a {
+        border-radius: 20px;
+        padding: 0.7rem 0.8rem;
+        font-size: 0.95rem;
+    }
+    .side-menu .logout {
+        margin-top: 0;
+        padding: 0.5rem 0.5rem;
+        border-top: none;
+    }
+}
+.main-content {
+    margin-right: 240px;
+    padding: 2rem 1.5rem;
+}
+@media (max-width: 700px) {
+    .main-content {
+        margin-right: 0;
+        margin-top: 80px;
+        padding: 1rem 0.5rem;
+    }
+}
