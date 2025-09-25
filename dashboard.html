@@ -8,24 +8,17 @@
     <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-    <div class="side-menu">
-        <div class="menu-icon" id="menuIcon">
-            <div class="menu-icon-bar"></div>
-            <div class="menu-icon-bar"></div>
-            <div class="menu-icon-bar"></div>
-        </div>
-        <div class="menu-title">Menu</div>
-        <ul id="sideMenuList">
-            <li><a href="dashboard.html" class="active">Dashboard</a></li>
-            <li><a href="addfunds.html">Add Funds</a></li>
-            <li><a href="order.html">Order</a></li>
-            <li><a href="settings.html">Settings</a></li>
-            <li><a href="customer.html">Customer Care</a></li>
-            <li><a href="transaction.html">Transaction History</a></li>
-            <li><a href="profile.html">Profile</a></li>
-        </ul>
-        <div class="logout">
-            <a href="logout.html">Log Out</a>
+    <div class="menu-dot-wrapper">
+        <div class="menu-dot" id="menuDot" tabindex="0" aria-label="Open menu" title="Menu" style="position:absolute;top:24px;right:24px;font-size:2.5rem;cursor:pointer;user-select:none;">&#8230;</div>
+        <div class="dropdown-menu" id="dropdownMenu" style="display:none;position:absolute;top:60px;right:24px;background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(26,115,232,0.13);padding:0.5rem 0;z-index:3000;min-width:180px;">
+            <a href="dashboard.html" class="dropdown-link">Dashboard</a>
+            <a href="addfunds.html" class="dropdown-link">Add Funds</a>
+            <a href="order.html" class="dropdown-link">Order</a>
+            <a href="settings.html" class="dropdown-link">Settings</a>
+            <a href="customer.html" class="dropdown-link">Customer Care</a>
+            <a href="transaction.html" class="dropdown-link">Transaction History</a>
+            <a href="profile.html" class="dropdown-link">Profile</a>
+            <a href="logout.html" class="dropdown-link logout-link">Log Out</a>
         </div>
     </div>
     <div class="main-content">
@@ -75,35 +68,26 @@
         </div>
     </div>
     <script>
-    // Hamburger menu logic (fixed order)
-    const sideMenu = document.querySelector('.side-menu');
-    const menuIcon = document.getElementById('menuIcon');
-    menuIcon.onclick = function(e) {
+    // Three-dot dropdown menu logic
+    const menuDot = document.getElementById('menuDot');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    menuDot.onclick = function(e) {
         e.stopPropagation();
-        sideMenu.classList.toggle('closed');
-        menuIcon.classList.toggle('active');
+        dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
     };
-    // Close menu on click outside (mobile)
+    menuDot.onkeydown = function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            menuDot.click();
+        }
+    };
     document.addEventListener('click', function(e) {
-        if (!sideMenu.contains(e.target)) {
-            sideMenu.classList.add('closed');
-            menuIcon.classList.remove('active');
+        if (!menuDot.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.style.display = 'none';
         }
     });
-    // Open by default on desktop, closed on mobile
-    function setMenuInitial() {
-        if (window.innerWidth < 800) {
-            sideMenu.classList.add('closed');
-            menuIcon.classList.remove('active');
-        } else {
-            sideMenu.classList.remove('closed');
-            menuIcon.classList.remove('active');
-        }
-    }
-    setMenuInitial();
-    window.addEventListener('resize', setMenuInitial);
     // Highlight active menu item
-    const links = document.querySelectorAll('.side-menu ul li a');
+    const links = document.querySelectorAll('.dropdown-link');
     links.forEach(link => {
         if (window.location.pathname.endsWith(link.getAttribute('href'))) {
             link.classList.add('active');

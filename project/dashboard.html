@@ -9,21 +9,56 @@
 </head>
 <body>
     <div class="side-menu">
-        <div class="menu-icon" id="menuIcon" tabindex="0" aria-label="Open menu" style="position:absolute;top:24px;left:24px;font-size:2.2rem;cursor:pointer;user-select:none;">
-            <span title="Menu" aria-label="Menu">📋</span>
+        <div class="menu-icon" id="menuIcon" tabindex="0" aria-label="Open menu" style="position:absolute;top:24px;right:24px;font-size:2.2rem;cursor:pointer;user-select:none;">
+            <span title="Menu" aria-label="Menu">&#8942;</span>
         </div>
-        <div class="menu-title">Menu</div>
-        <ul id="sideMenuList">
-            <li><a href="dashboard.html" class="active">Dashboard</a></li>
-            <li><a href="addfunds.html">Add Funds</a></li>
-            <li><a href="order.html">Order</a></li>
-            <li><a href="settings.html">Settings</a></li>
-            <li><a href="customer.html">Customer Care</a></li>
-            <li><a href="transaction.html">Transaction History</a></li>
-            <li><a href="profile.html">Profile</a></li>
-        </ul>
-        <div class="logout">
-            <a href="logout.html">Log Out</a>
+        <div class="dropdown-menu" id="dropdownMenu" style="display:none;position:absolute;top:60px;right:24px;background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(26,115,232,0.13);padding:1rem;z-index:3000;min-width:180px;">
+            <a href="dashboard.html" class="dropdown-link">Dashboard</a>
+            <a href="addfunds.html" class="dropdown-link">Add Funds</a>
+            <a href="order.html" class="dropdown-link">Order</a>
+            <a href="settings.html" class="dropdown-link">Settings</a>
+            <a href="customer.html" class="dropdown-link">Customer Care</a>
+            <a href="transaction.html" class="dropdown-link">Transaction History</a>
+            <a href="profile.html" class="dropdown-link">Profile</a>
+            <a href="logout.html" class="dropdown-link logout-link">Log Out</a>
+        <style>
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 24px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(26,115,232,0.13);
+            padding: 0.5rem 0;
+            z-index: 3000;
+            min-width: 180px;
+        }
+        .dropdown-link {
+            display: block;
+            padding: 0.8rem 1.2rem;
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 1px solid #e0e7ef;
+            transition: background 0.2s, color 0.2s;
+        }
+        .dropdown-link:last-child {
+            border-bottom: none;
+        }
+        .dropdown-link:hover {
+            background: #e3f0fd;
+            color: #222;
+        }
+        .logout-link {
+            color: #e41a1c !important;
+            font-weight: 700;
+        }
+        </style>
+        </div>
+
+        
+            
         </div>
     </div>
     <div class="main-content">
@@ -73,13 +108,12 @@
         </div>
     </div>
     <script>
-    // Animated Hamburger menu logic
-    const sideMenu = document.querySelector('.side-menu');
+    // Tap icon dropdown menu logic
     const menuIcon = document.getElementById('menuIcon');
+    const dropdownMenu = document.getElementById('dropdownMenu');
     menuIcon.onclick = function(e) {
         e.stopPropagation();
-        sideMenu.classList.toggle('closed');
-        menuIcon.classList.toggle('active');
+        dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
     };
     menuIcon.onkeydown = function(e) {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -88,22 +122,10 @@
         }
     };
     document.addEventListener('click', function(e) {
-        if (!sideMenu.contains(e.target) && !menuIcon.contains(e.target)) {
-            sideMenu.classList.add('closed');
-            menuIcon.classList.remove('active');
+        if (!menuIcon.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.style.display = 'none';
         }
     });
-    function setMenuInitial() {
-        if (window.innerWidth < 800) {
-            sideMenu.classList.add('closed');
-            menuIcon.classList.remove('active');
-        } else {
-            sideMenu.classList.remove('closed');
-            menuIcon.classList.remove('active');
-        }
-    }
-    setMenuInitial();
-    window.addEventListener('resize', setMenuInitial);
     // Highlight active menu item
     const links = document.querySelectorAll('.side-menu ul li a');
     links.forEach(link => {
